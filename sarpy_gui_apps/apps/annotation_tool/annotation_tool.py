@@ -15,21 +15,22 @@ from sarpy.geometry.geometry_elements import Polygon
 from sarpy.annotation.annotate import FileAnnotationCollection
 from sarpy.annotation.annotate import Annotation
 from sarpy.annotation.annotate import LabelSchema
+from sarpy_gui_apps.apps.annotation_tool.panels.treeview_panel.treeview_panel import TreeviewPanel
 
 
 class AnnotationTool(AbstractWidgetPanel):
     context_panel = ContextImagePanel
     annotate_panel = AnnotateImagePanel
+    treeview_panel = TreeviewPanel
 
     def __init__(self, master):
         master_frame = tkinter.Frame(master)
         AbstractWidgetPanel.__init__(self, master_frame)
 
-        widgets_list = ["context_panel", "annotate_panel"]
+        widgets_list = ["context_panel", "annotate_panel", "treeview_panel"]
         self.init_w_horizontal_layout(widgets_list)
-        master_frame.pack()
         self.pack()
-
+        master_frame.pack()
         self.variables = AppVariables()
 
         self.annotate_panel.annotate_dashboard.controls.disable_all_buttons()

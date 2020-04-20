@@ -31,6 +31,18 @@ class WidgetEvents(tkinter.Misc):
     def on_mouse_motion(self, event):
         self.bind("<Motion>", event)
 
+    def on_left_arrow_key(self, event):
+        self.bind("<Left>", event)
+
+    def on_right_arrow_key(self, event):
+        self.bind("<Right", event)
+
+    def on_up_arrow_key(self, event):
+        self.bind("<Up>", event)
+
+    def on_down_arrow_key(self, event):
+        self.bind("<Down>", event)
+
     def on_mouse_wheel(self, event):
         if platform.system() == "Linux":
             self.bind("<Button-4>", event)
