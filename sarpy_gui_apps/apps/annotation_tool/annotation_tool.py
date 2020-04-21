@@ -63,6 +63,17 @@ class AnnotationTool(AbstractWidgetPanel):
 
         self.annotate_panel.image_canvas.set_labelframe_text("Image View")
 
+        self.treeview_panel.button.on_left_mouse_click(self.callback_add_treeview_entry)
+        self.treeview_panel.tree.on_left_mouse_click(self.callback_get_treeview_data)
+
+    # treeview callbacks
+    def callback_add_treeview_entry(self, event):
+        self.treeview_panel.insert_data()
+
+    def callback_get_treeview_data(self, event):
+        current_item = self.treeview_panel.tree.selection()
+        print(self.treeview_panel.tree.item(current_item))
+
     # context callbacks
     def callback_context_select_file(self, event):
         self.context_panel.context_dashboard.file_selector.set_fname_filters([('nitf files', '*')])
