@@ -2,7 +2,7 @@ import numpy as np
 from typing import Union
 import tkinter
 
-NO_TEXT_UPDATE_WIDGETS = ['ttk::scale']
+NO_TEXT_UPDATE_WIDGETS = ['ttk::scale', 'ttk::treeview']
 
 
 class AbstractWidgetPanel(tkinter.LabelFrame):
