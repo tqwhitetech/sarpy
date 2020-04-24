@@ -34,6 +34,13 @@ class TreeviewPanel(AbstractWidgetPanel):
         self.tree.column('#1', stretch=tkinter.YES)
         self.tree.column('#2', stretch=tkinter.YES)
 
+    def load_annotations(self, annotations):
+        for entry in annotations.annotations.features:
+            id = entry.uid
+            geometry = entry.geometry
+            self.tree.insert('', 'end', text=id, values=("stuff", "things"))
+            stop = 1
+
     def insert_data(self):
         """
         Insertion method.

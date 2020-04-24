@@ -64,15 +64,18 @@ class AnnotationTool(AbstractWidgetPanel):
         self.annotate_panel.image_canvas.set_labelframe_text("Image View")
 
         self.treeview_panel.button.on_left_mouse_click(self.callback_add_treeview_entry)
-        self.treeview_panel.tree.on_left_mouse_click(self.callback_get_treeview_data)
+        self.treeview_panel.tree.on_treeview_select(self.callback_get_treeview_data)
 
     # treeview callbacks
     def callback_add_treeview_entry(self, event):
         self.treeview_panel.insert_data()
 
     def callback_get_treeview_data(self, event):
-        current_item = self.treeview_panel.tree.selection()
-        print(self.treeview_panel.tree.item(current_item))
+        current_items = self.treeview_panel.tree.selection()
+        if len(current_items) == 1:
+            print(self.treeview_panel.tree.item(current_items[0]))
+        else:
+            pass
 
     # context callbacks
     def callback_context_select_file(self, event):
@@ -133,37 +136,44 @@ class AnnotationTool(AbstractWidgetPanel):
         else:
             self.context_panel.context_dashboard.annotation_selector.event_select_file(event)
             annotation_fname = self.context_panel.context_dashboard.annotation_selector.fname
-            if annotation_fname != '':
-                # save a backup
-                backup_file_fname = os.path.join(os.path.dirname(annotation_fname), os.path.basename(annotation_fname) + '.bak' )
-                copyfile(annotation_fname, backup_file_fname)
-                self.variables.file_annotation_fname = annotation_fname
-                self.variables.file_annotation_collection = FileAnnotationCollection.from_file(annotation_fname)
-                self.variables.label_schema = self.variables.file_annotation_collection.label_schema
-                if self.variables.file_annotation_collection.image_file_name == os.path.basename(self.variables.image_fname):
-                    self.context_panel.context_dashboard.buttons.activate_all_buttons()
-                    self.annotate_panel.annotate_dashboard.controls.activate_all_buttons()
+            self.load_existing_annotation(annotation_fname)
 
-                    # disable the original file controls so the user can't go back and select a different annotation
-                    # file during the labeling process
-                    self.context_panel.context_dashboard.file_selector.disable_all_buttons()
-                    self.context_panel.context_dashboard.annotation_selector.disable_all_buttons()
+    def load_existing_annotation(self, annotation_fname):
+        if annotation_fname != '':
+            # save a backup
+            backup_file_fname = os.path.join(os.path.dirname(annotation_fname),
+                                             os.path.basename(annotation_fname) + '.bak')
+            copyfile(annotation_fname, backup_file_fname)
+            self.variables.file_annotation_fname = annotation_fname
+            self.variables.file_annotation_collection = FileAnnotationCollection.from_file(annotation_fname)
+            self.variables.label_schema = self.variables.file_annotation_collection.label_schema
+            if self.variables.file_annotation_collection.image_file_name == os.path.basename(
+                    self.variables.image_fname):
+                self.context_panel.context_dashboard.buttons.activate_all_buttons()
+                self.annotate_panel.annotate_dashboard.controls.activate_all_buttons()
 
-                    # create canvas shapes from existing annotations and create dictionary to keep track of canvas geometries
-                    # that are mapped to the annotations
-                    for feature in self.variables.file_annotation_collection.annotations.features:
-                        image_coords = feature.geometry.get_coordinate_list()[0]
-                        image_coords_1d = list(np.reshape(image_coords, np.asarray(image_coords).size))
-                        tmp_shape_id = self.annotate_panel.image_canvas.create_new_polygon((0, 0, 1, 1))
-                        self.annotate_panel.image_canvas.set_shape_pixel_coords(tmp_shape_id, image_coords_1d)
-                        self.variables.canvas_geom_ids_to_annotations_id_dict[str(tmp_shape_id)] = feature
-                    self.annotate_panel.image_canvas.redraw_all_shapes()
-                else:
-                    print("the image filename and the filename of the annotation do not match.  Select an annotation")
-                    print("that matches the input filename.")
+                # disable the original file controls so the user can't go back and select a different annotation
+                # file during the labeling process
+                self.context_panel.context_dashboard.file_selector.disable_all_buttons()
+                self.context_panel.context_dashboard.annotation_selector.disable_all_buttons()
 
+                # create canvas shapes from existing annotations and create dictionary to keep track of canvas geometries
+                # that are mapped to the annotations
+                for feature in self.variables.file_annotation_collection.annotations.features:
+                    image_coords = feature.geometry.get_coordinate_list()[0]
+                    image_coords_1d = list(np.reshape(image_coords, np.asarray(image_coords).size))
+                    tmp_shape_id = self.annotate_panel.image_canvas.create_new_polygon((0, 0, 1, 1))
+                    self.annotate_panel.image_canvas.set_shape_pixel_coords(tmp_shape_id, image_coords_1d)
+                    self.variables.canvas_geom_ids_to_annotations_id_dict[str(tmp_shape_id)] = feature
+                self.annotate_panel.image_canvas.redraw_all_shapes()
+                self.treeview_panel.load_annotations(self.variables.file_annotation_collection)
             else:
-                print("select a valid label file annotation collection.")
+                print("the image filename and the filename of the annotation do not match.  Select an annotation")
+                print("that matches the input filename.")
+
+        else:
+            print("select a valid label file annotation collection.")
+
 
     def callback_context_set_to_select(self, event):
         self.context_panel.context_dashboard.buttons.set_active_button(self.context_panel.context_dashboard.buttons.select)
